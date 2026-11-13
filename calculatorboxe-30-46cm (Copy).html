@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+    <link rel="icon" type="image/png" href="speakerbuffer-icon.png">
+    <meta charset="UTF-8">
+    <title>Calculator Subwoofere (30 cm - 46 cm)</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background: #121212; color: #fff; }
+        .box { max-width: 420px; padding: 20px; border: 1px solid #333; border-radius: 8px; background: #1e1e1e; }
+        input, select { width: 100%; padding: 8px; margin: 8px 0; box-sizing: border-box; }
+        button { width: 100%; padding: 10px; background: #007bff; color: white; border: none; font-weight: bold; cursor: pointer; }
+        .rezultat { margin-top: 15px; padding: 10px; background: #2a2a2a; border-radius: 5px; }
+    </style>
+</head>
+<body>
+
+<div class="box">
+    <h2>Calculator Subwoofere (30 cm - 46 cm)</h2>
+    <p><small>Lățimi fixe dedicate | MDF: 2 cm | Spate magnet: 8 cm</small></p>
+
+    <label>Selectează difuzorul (Lățime exterioară fixă):</label>
+    <select id="diametru">
+        <option value="30">30 cm (12") — Lățime fixă 46 cm</option>
+        <option value="38">38 cm (15") — Lățime fixă 54 cm</option>
+        <option value="46">46 cm (18") — Lățime fixă 62 cm</option>
+    </select>
+
+    <label>Tip incintă:</label>
+    <select id="tipIncinta" onchange="schimbaTipIncintaMari()">
+        <option value="inchisa">Incintă Închisă</option>
+        <option value="bassreflex">Incintă Bas-Reflex (cu tub)</option>
+    </select>
+
+    <div id="campFrecventa" style="display: none;">
+        <label>Frecvență acordaj tub (Hz):</label>
+        <input type="number" id="frecventa" value="40" placeholder="ex: 40">
+    </div>
+
+    <label>Volum dorit (Litri):</label>
+    <input type="number" id="volum" placeholder="ex: 60" step="0.1">
+
+    <label>Înălțime interioară (cm):</label>
+    <input type="number" id="inaltimeInt" placeholder="ex: 50">
+
+    <button onclick="calculeazaSubwoofer()">Calculează Dimensiuni</button>
+
+    <div id="rezultat" class="rezultat"></div>
+</div>
+
+<script>
+function schimbaTipIncintaMari() {
+    let tip = document.getElementById("tipIncinta").value;
+    document.getElementById("campFrecventa").style.display = (tip === "bassreflex") ? "block" : "none";
+}
+
+function calculeazaSubwoofer() {
+    const diametru = parseFloat(document.getElementById("diametru").value);
+    const volum = parseFloat(document.getElementById("volum").value);
+    const inaltimeInt = parseFloat(document.getElementById("inaltimeInt").value);
+    const tipIncinta = document.getElementById("tipIncinta").value;
+    const GROSIME_MDF = 2;
+
+    if (!volum || !inaltimeInt) {
+        alert("Te rugăm să introduci volumul și înălțimea!");
+        return;
+    }
+
+    let latimeExt;
+    if (diametru === 30) latimeExt = 46;
+    else if (diametru === 38) latimeExt = 54;
+    else if (diametru === 46) latimeExt = 62;
+
+    const latimeInt = latimeExt - (2 * GROSIME_MDF);
+    const adancimeInt = (volum * 1000) / (latimeInt * inaltimeInt);
+    
+    const inaltimeExt = inaltimeInt + (2 * GROSIME_MDF);
+    const adancimeExt = adancimeInt + (2 * GROSIME_MDF);
+
+    let htmlRezultat = `
+        <b>Dimensiuni exterior MDF (${GROSIME_MDF} cm):</b><br>
+        • Lățime exterioară fixă: <b>${latimeExt} cm</b><br>
+        • Înălțime exterioară: <b>${inaltimeExt.toFixed(1)} cm</b><br>
+        • Adâncime exterioară: <b>${adancimeExt.toFixed(1)} cm</b><br><br>
+        <small>Adâncime interioară utilă: ${adancimeInt.toFixed(1)} cm<br>
+        Distanță fixă magnet-spate: 8 cm</small>
+    `;
+
+    if (tipIncinta === "bassreflex") {
+        const frecventa = parseFloat(document.getElementById("frecventa").value);
+        const DIAMETRU_TUB = 7;
+        const SUPRAFATA_TUB = 38.48;
+        
+        let lungimeTub = (23544 * SUPRAFATA_TUB) / (Math.pow(frecventa, 2) * volum) - (0.825 * DIAMETRU_TUB);
+        
+        htmlRezultat += `<hr><b>Tub PVC standard (7 cm diametru):</b><br>`;
+        if (lungimeTub > 0) {
+            htmlRezultat += `• Lungime tăiere tub: <b>${lungimeTub.toFixed(1)} cm</b> (la ${frecventa} Hz)`;
+        } else {
+            htmlRezultat += `<span style="color:red;">Volum prea mare sau frecvență prea joasă!</span>`;
+        }
+    }
+
+    document.getElementById("rezultat").innerHTML = htmlRezultat;
+}
+</script>
+
+</body>
+</html>

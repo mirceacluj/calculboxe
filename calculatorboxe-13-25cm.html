@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+  <link rel="icon" type="image/png" href="speakermiddle-icon.png">  
+    <meta charset="UTF-8">
+    <title>Calculator Incinte (13 cm - 25 cm)</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background: #121212; color: #fff; }
+        .box { max-width: 420px; padding: 20px; border: 1px solid #333; border-radius: 8px; background: #1e1e1e; }
+        input, select { width: 100%; padding: 8px; margin: 8px 0; box-sizing: border-box; }
+        button { width: 100%; padding: 10px; background: #28a745; color: white; border: none; font-weight: bold; cursor: pointer; }
+        .rezultat { margin-top: 15px; padding: 10px; background: #2a2a2a; border-radius: 5px; }
+    </style>
+</head>
+<body>
+
+<div class="box">
+    <h2>Calculator Incinte (13 cm - 25 cm)</h2>
+    <p><small>Lățime fixă: 41 cm | MDF: 2 cm | Spate magnet: 4 cm</small></p>
+
+    <label>Tip incintă:</label>
+    <select id="tipIncinta" onchange="schimbaTipIncinta()">
+        <option value="inchisa">Incintă Închisă</option>
+        <option value="bassreflex">Incintă Bas-Reflex (cu tub)</option>
+    </select>
+
+    <div id="campFrecventa" style="display: none;">
+        <label>Frecvență acordaj tub (Hz):</label>
+        <input type="number" id="frecventa" value="45" placeholder="ex: 45">
+    </div>
+
+    <label>Volum dorit (Litri):</label>
+    <input type="number" id="volum" placeholder="ex: 20" step="0.1">
+
+    <label>Înălțime interioară (cm):</label>
+    <input type="number" id="inaltimeInt" placeholder="ex: 40">
+
+    <button onclick="calculeazaMici()">Calculează</button>
+
+    <div id="rezultat" class="rezultat"></div>
+</div>
+
+<script>
+function schimbaTipIncinta() {
+    let tip = document.getElementById("tipIncinta").value;
+    document.getElementById("campFrecventa").style.display = (tip === "bassreflex") ? "block" : "none";
+}
+
+function calculeazaMici() {
+    const volum = parseFloat(document.getElementById("volum").value);
+    const inaltimeInt = parseFloat(document.getElementById("inaltimeInt").value);
+    const tipIncinta = document.getElementById("tipIncinta").value;
+    const GROSIME_MDF = 2;
+
+    if (!volum || !inaltimeInt) {
+        alert("Introdu volumul și înălțimea!");
+        return;
+    }
+
+    const latimeExt = 41;
+    const latimeInt = latimeExt - (2 * GROSIME_MDF);
+    const adancimeInt = (volum * 1000) / (latimeInt * inaltimeInt);
+    
+    const inaltimeExt = inaltimeInt + (2 * GROSIME_MDF);
+    const adancimeExt = adancimeInt + (2 * GROSIME_MDF);
+
+    let htmlRezultat = `
+        <b>Dimensiuni exterior MDF (${GROSIME_MDF} cm):</b><br>
+        • Lățime exterioară fixă: <b>${latimeExt} cm</b><br>
+        • Înălțime exterioară: <b>${inaltimeExt.toFixed(1)} cm</b><br>
+        • Adâncime exterioară: <b>${adancimeExt.toFixed(1)} cm</b><br><br>
+        <small>Adâncime interioară: ${adancimeInt.toFixed(1)} cm (Spate fix: 4 cm)</small>
+    `;
+
+    if (tipIncinta === "bassreflex") {
+        const frecventa = parseFloat(document.getElementById("frecventa").value);
+        const DIAMETRU_TUB = 7;
+        const SUPRAFATA_TUB = 38.48;
+        
+        let lungimeTub = (23544 * SUPRAFATA_TUB) / (Math.pow(frecventa, 2) * volum) - (0.825 * DIAMETRU_TUB);
+        
+        htmlRezultat += `<hr><b>Tub PVC standard (7 cm diametru):</b><br>`;
+        if (lungimeTub > 0) {
+            htmlRezultat += `• Lungime tăiere tub: <b>${lungimeTub.toFixed(1)} cm</b> (la ${frecventa} Hz)`;
+        } else {
+            htmlRezultat += `<span style="color:red;">Volum prea mare sau frecvență prea joasă!</span>`;
+        }
+    }
+
+    document.getElementById("rezultat").innerHTML = htmlRezultat;
+}
+</script>
+
+</body>
+</html>
